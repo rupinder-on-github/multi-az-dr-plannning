@@ -1,0 +1,9 @@
+RPO (Recovery Point Objective) and RTO (Recovery Time Objective) are two key metrics used in disaster recovery planning to determine how much data loss and downtime a system can tolerate in the event of a disaster.
+
+For Aurora Multi-AZ PostgreSQL, the RPO and RTO depend on the configuration of the database cluster and the recovery strategy employed. Here's a general overview:
+
+RPO: In Aurora Multi-AZ, the database writes data synchronously to a primary instance and an automatically replicated secondary instance located in a different Availability Zone (AZ). Aurora Multi-AZ provides a low Recovery Point Objective (RPO) of seconds, which means that the data loss is minimal in case of a disaster. The exact RPO for your Aurora Multi-AZ PostgreSQL database will depend on the replication lag between the primary and secondary instances.
+
+RTO: The Recovery Time Objective (RTO) for an Aurora Multi-AZ PostgreSQL database is typically around 1-2 minutes. In case of a disaster, the secondary instance in a different AZ is automatically promoted to the primary instance and clients are redirected to the new primary instance. This promotion typically takes less than a minute, and the database can resume normal operation.
+
+Note that the exact RPO and RTO for your Aurora Multi-AZ PostgreSQL database may vary depending on the specific configuration and the recovery strategy employed. It's important to consult the AWS documentation and seek advice from an AWS-certified solutions architect to determine the best disaster recovery plan for your specific use case.
