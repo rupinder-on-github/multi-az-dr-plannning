@@ -1,0 +1,15 @@
+Performing DR testing on your AWS Aurora multi-AZ setup by doing failover to another availability zone is a good way to ensure that your system is resilient to unexpected events.
+
+Here are the steps to perform a DR test on your Aurora multi-AZ setup:
+
+Verify the current Aurora status: Before starting the DR test, you should verify that your Aurora cluster is currently in a healthy state and that the replication is up-to-date between the primary and secondary instances.
+
+Trigger the failover: To test the DR scenario, you will need to simulate a failure of the primary instance. You can do this by manually promoting the secondary instance to become the new primary instance. This can be done through the AWS Management Console or using the AWS CLI.
+
+Monitor the failover process: Once you have initiated the failover process, you should monitor the progress of the failover to ensure that it completes successfully. You can monitor the failover progress using the AWS Management Console or the AWS CLI.
+
+Test the new primary instance: Once the failover process has completed, you should test the new primary instance to ensure that it is functioning as expected. This may include testing database connectivity, running queries, and verifying data consistency.
+
+Perform a DR test report: Finally, you should document the results of your DR test in a report. This report should include details about the testing methodology, the results of the test, and any issues or concerns that were identified during the test.
+
+It's important to note that performing a DR test by triggering a failover will cause a brief interruption in database connectivity, so it's recommended to schedule the test during a maintenance window or a time when the impact on users is minimal.
