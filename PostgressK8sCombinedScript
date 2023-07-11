@@ -1,0 +1,38 @@
+#!/bin/bash
+
+AZ_NAME="$1"
+TARGET_GROUP_ARN="$2"
+TAG_PATTERN="$3"
+DB_CLUSTER_IDENTIFIER="$4"
+
+# Step 1: Get the instance IDs matching the specified AZ and tag pattern
+INSTANCE_IDS=$(aws ec2 describe-instances --filters "Name=availability-zone,Values=${AZ_NAME}" "Name=tag:Name,Values=${TAG_PATTERN}*" --query 'Reservations[].Instances[].InstanceId' --output text)
+
+# Step 2: Deregister instances from the target group
+aws elbv2 deregister-targets --target-group-arn "${TARGET_GROUP_ARN}" --targets $(aws ec2 describe-instances --instance-ids ${INSTANCE_IDS} --query 'Reservations[].Instances[].[InstanceId]' --output text | awk -vORS=, '{ print $1 }' | sed 's/,$/\n/')
+
+# Step 3: Wait for instances to be removed from the target group
+echo "Waiting for instances to be removed from the target group..."
+aws elbv2 wait target-deregistered --target-group-arn "${TARGET_GROUP_ARN}" --targets Id=$(aws ec2 describe-instances --instance-ids ${INSTANCE_IDS} --query 'Reservations[].Instances[].[InstanceId]' --output text | awk '{ print "{\"Id\":\"" $1 "\"}" }' | jq -c '.')
+
+# Step 4: Verify removal
+target_health=$(aws elbv2 describe-target-health --target-group-arn "${TARGET_GROUP_ARN}")
+num_azs=$(echo "${target_health}" | jq -r '.TargetHealthDescriptions[].Target.Id' | awk -F'-' '{print $3}' | sort -u | wc -l)
+report=$(echo "${target_health}" | jq -r '.TargetHealthDescriptions[] | {InstanceId: .Target.Id, AvailabilityZone: .AvailabilityZone}')
+echo "Cluster is running in ${num_azs} AZs."
+echo "Instances removed from Target Group:"
+echo "${report}"
+
+# Step 5: Initiate DB failover
+echo "Initiating DB failover..."
+PRIMARY_INSTANCE_IDENTIFIER=$(aws rds describe-db-clusters --db-cluster-identifier "${DB_CLUSTER_IDENTIFIER}" --query 'DBClusters[0].DBClusterMembers[?IsClusterWriter==`true`].DBInstanceIdentifier' --output text)
+aws rds failover-db-cluster --db-cluster-identifier "${DB_CLUSTER_IDENTIFIER}"
+aws rds wait db-instance-available --db-instance-identifier "${PRIMARY_INSTANCE_IDENTIFIER}"
+
+# Step 6: Verify DB failover completion
+NEW_PRIMARY_INSTANCE_IDENTIFIER=$(aws rds describe-db-clusters --db-cluster-identifier "${DB_CLUSTER_IDENTIFIER}" --query 'DBClusters[0].DBClusterMembers[?IsClusterWriter==`true`].DBInstanceIdentifier' --output text)
+if [ "${PRIMARY_INSTANCE_IDENTIFIER}" == "${NEW_PRIMARY_INSTANCE_IDENTIFIER}" ]; then
+    echo "DB failover completed successfully."
+else
+    echo "DB failover did not occur. Please check the status of the DB cluster."
+fi
