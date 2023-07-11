@@ -2,9 +2,10 @@
 
 AZ_NAME="$1"
 TARGET_GROUP_ARN="$2"
+TAG_PATTERN="$3"
 
-# Step 1: Get the instance IDs in the specified AZ
-INSTANCE_IDS=$(aws ec2 describe-instances --filters "Name=availability-zone,Values=${AZ_NAME}" --query 'Reservations[].Instances[].InstanceId' --output text)
+# Step 1: Get the instance IDs matching the specified AZ and tag pattern
+INSTANCE_IDS=$(aws ec2 describe-instances --filters "Name=availability-zone,Values=${AZ_NAME}" "Name=tag:Name,Values=${TAG_PATTERN}*" --query 'Reservations[].Instances[].InstanceId' --output text)
 
 # Step 2: Deregister instances from the target group
 aws elbv2 deregister-targets --target-group-arn "${TARGET_GROUP_ARN}" --targets $(aws ec2 describe-instances --instance-ids ${INSTANCE_IDS} --query 'Reservations[].Instances[].[InstanceId]' --output text | awk -vORS=, '{ print $1 }' | sed 's/,$/\n/')
