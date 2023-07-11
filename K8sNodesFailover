@@ -1,0 +1,18 @@
+#!/bin/bash
+
+AZ_NAME="$1"
+TARGET_GROUP_ARN="$2"
+
+# Step 1: Get the instance IDs in the specified AZ
+INSTANCE_IDS=$(aws ec2 describe-instances --filters "Name=availability-zone,Values=${AZ_NAME}" --query 'Reservations[].Instances[].InstanceId' --output text)
+
+# Step 2: Deregister instances from the target group
+aws elbv2 deregister-targets --target-group-arn "${TARGET_GROUP_ARN}" --targets $(aws ec2 describe-instances --instance-ids ${INSTANCE_IDS} --query 'Reservations[].Instances[].[InstanceId]' --output text | awk -vORS=, '{ print $1 }' | sed 's/,$/\n/')
+
+# Step 3: Verify removal
+target_health=$(aws elbv2 describe-target-health --target-group-arn "${TARGET_GROUP_ARN}")
+num_azs=$(echo "${target_health}" | jq -r '.TargetHealthDescriptions[].Target.Id' | awk -F'-' '{print $3}' | sort -u | wc -l)
+report=$(echo "${target_health}" | jq -r '.TargetHealthDescriptions[] | {InstanceId: .Target.Id, AvailabilityZone: .AvailabilityZone}')
+echo "Cluster is running in ${num_azs} AZs."
+echo "Instances removed from Target Group:"
+echo "${report}"
