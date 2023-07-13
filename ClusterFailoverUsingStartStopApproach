@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# Set the AWS region
+AWS_REGION="us-east-2"
+
+# Set the number of master and worker nodes
+NUM_MASTER_NODES=3
+NUM_WORKER_NODES=5
+
+# Default parameter values
+TAG_PATTERN=""
+FAILED_AZ=""
+ACTION=""
+
+# Parse command-line options
+while getopts ":t:a:z:" opt; do
+  case $opt in
+    t)
+      TAG_PATTERN="$OPTARG"
+      ;;
+    a)
+      ACTION="$OPTARG"
+      ;;
+    z)
+      FAILED_AZ="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Function to start EC2 instances
+start_instances() {
+  local tag_pattern=$1
+  local az=$2
+
+  aws ec2 start-instances \
+    --region $AWS_REGION \
+    --filters "Name=tag:Name,Values=$tag_pattern" "Name=availability-zone,Values=$az" \
+    --query "StartingInstances[].InstanceId" \
+    --output text
+}
+
+# Function to stop EC2 instances
+stop_instances() {
+  local tag_pattern=$1
+  local az=$2
+
+  aws ec2 stop-instances \
+    --region $AWS_REGION \
+    --filters "Name=tag:Name,Values=$tag_pattern" "Name=availability-zone,Values=$az" \
+    --query "StoppingInstances[].InstanceId" \
+    --output text
+}
+
+# Function to wait for instances to be in the specified state
+wait_for_state() {
+  local instance_ids=$1
+  local desired_state=$2
+
+  if [ "$desired_state" == "running" ]; then
+    aws ec2 wait instance-running \
+      --region $AWS_REGION \
+      --instance-ids $instance_ids
+  elif [ "$desired_state" == "stopped" ]; then
+    aws ec2 wait instance-stopped \
+      --region $AWS_REGION \
+      --instance-ids $instance_ids
+  else
+    echo "Invalid desired state. Please specify 'running' or 'stopped'."
+    exit 1
+  fi
+}
+
+# Get the instance IDs for instances matching the tag pattern and availability zone
+if [ "$ACTION" == "start" ]; then
+  instance_ids=$(start_instances "$TAG_PATTERN" "$FAILED_AZ")
+elif [ "$ACTION" == "stop" ]; then
+  instance_ids=$(stop_instances "$TAG_PATTERN" "$FAILED_AZ")
+else
+  echo "Invalid action. Please specify 'start' or 'stop'."
+  exit 1
+fi
+
+# Perform the specified action
+if [ "$ACTION" == "start" ]; then
+  wait_for_state "$instance_ids" "running"
+  echo "Started instances with IDs: $instance_ids"
+elif [ "$ACTION" == "stop" ]; then
+  wait_for_state "$instance_ids" "stopped"
+  echo "Stopped instances with IDs: $instance_ids"
+fi
