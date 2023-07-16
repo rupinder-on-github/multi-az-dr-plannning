@@ -1,0 +1,51 @@
+Procedural Documentation: Simulating AWS AZ Failure in a Kubernetes Cluster
+
+This procedural documentation will guide you through the process of using the provided script to simulate an AWS Availability Zone (AZ) failure in a Kubernetes (k8s) cluster running in the us-east-2 region. The script allows you to start or stop EC2 instances in a specific AZ based on a provided tag pattern.
+
+Prerequisites:
+
+AWS CLI: Ensure you have the AWS CLI installed and configured with appropriate credentials for the AWS account where your Kubernetes cluster is deployed.
+Procedure:
+
+Open a text editor and create a new file.
+Copy and paste the provided script into the file.
+Save the file with a meaningful name, e.g., "simulate-az-failure.sh".
+Script Options:
+The script accepts the following command-line options:
+
+-t: Specify a tag pattern to filter the EC2 instances. Only instances with tags matching this pattern will be started or stopped.
+-a: Specify the action to perform. Use "start" to start instances or "stop" to stop instances.
+-z: Specify the AZ in which the instances should be started or stopped.
+Example Usage:
+To start instances in a specific AZ with a specific tag pattern, use the following command:
+
+php
+Copy code
+./simulate-az-failure.sh -a start -t <tag_pattern> -z <az_name>
+To stop instances in a specific AZ with a specific tag pattern, use the following command:
+
+php
+Copy code
+./simulate-az-failure.sh -a stop -t <tag_pattern> -z <az_name>
+Note: Replace <tag_pattern> with the desired tag pattern and <az_name> with the name of the target AZ.
+
+Example Scenario:
+Let's assume you want to simulate an AZ failure in the us-east-2 region for instances with the tag pattern "k8s-cluster" in AZ "us-east-2a". To start the instances, use the following command:
+
+bash
+Copy code
+./simulate-az-failure.sh -a start -t k8s-cluster -z us-east-2a
+To stop the instances, use the following command:
+
+arduino
+Copy code
+./simulate-az-failure.sh -a stop -t k8s-cluster -z us-east-2a
+The script will start or stop the EC2 instances matching the provided tag pattern in the specified AZ and wait for them to reach the desired state. Once the instances have reached the desired state, the script will display the IDs of the affected instances.
+
+Note: Ensure that the cluster instances and the specified tag pattern match your specific setup. It is recommended to test this script in a non-production environment before using it in a production setting.
+
+That's it! You can now use the provided script to simulate an AWS AZ failure in your Kubernetes cluster and observe the behavior of your system during such an event.
+
+
+
+
