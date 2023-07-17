@@ -1,0 +1,55 @@
+Procedural Document: Simulating AWS AZ Failure for Cassandra Cluster DR
+
+Objective: Simulate an AWS Availability Zone (AZ) failure for the Cassandra cluster by removing an IP from the respective AZ in the secret.
+
+Prerequisites:
+
+Access to the Kubernetes cluster where the Cassandra cluster is deployed.
+Permission to execute scripts and modify Kubernetes secrets.
+Procedure:
+
+Obtain the script.sh:
+
+Download or obtain the script.sh shell script that performs the IP removal from the secret. Ensure it is accessible to the SRO team.
+Identify the Cassandra Cluster Secret:
+
+Identify the name of the Kubernetes secret that holds the Cassandra cluster configuration, specifically the IP addresses.
+Note the format of the key-value pair in the secret, such as cassandra-endpoint : 10.23.34.1, 10.23.34.4, 10.23.34.8.
+Familiarize with the Script Usage:
+
+Ensure the SRO team is familiar with the usage of the script.sh script. Provide them with the following instructions:
+Execute the script using the command ./script.sh -s <secret-name> -i <IP-to-remove> [-n <namespace>].
+Replace <secret-name> with the name of the Cassandra cluster secret.
+Replace <IP-to-remove> with the specific IP address to remove from the respective AZ.
+Optionally, specify the Kubernetes namespace using the -n <namespace> flag. If not specified, it will default to fraudsight-micro.
+Determine the IP Address to Remove:
+
+Identify the IP address associated with the specific AZ that you want to simulate a failure for.
+Confirm with the relevant team or documentation to ensure the correct IP address is chosen.
+Simulate AWS AZ Failure:
+
+Execute the script to simulate the AWS AZ failure by removing the chosen IP address:
+Run the script.sh script with the appropriate parameters:
+Example: ./script.sh -s mydbsecret -i 10.23.34.1
+The script will update the Cassandra cluster secret, removing the specified IP address from the respective AZ.
+Verify the Result:
+
+After executing the script, the SRO team should observe the updated and old values displayed as output.
+Confirm that the IP address specified for removal is no longer present in the updated value.
+Monitor the Cassandra Cluster:
+
+Observe the behavior of the Cassandra cluster after the IP removal. Monitor the cluster for any changes or issues resulting from the simulated AZ failure.
+Make sure to follow the appropriate DR procedures to address the simulated failure, such as initiating the failover to another AZ.
+Cleanup and Restore:
+
+If needed, restore the original IP address by re-running the script with the original IP address value to add it back to the secret.
+Make sure to communicate the procedural document to your SRO team and ensure they have the necessary access and understanding to execute the script and simulate the AWS AZ failure for the Cassandra cluster.
+
+Note: This document provides a general guideline. Adapt it to suit your specific infrastructure, processes, and team requirements.
+
+
+
+
+
+
+Regenerate response
