@@ -1,1 +1,8 @@
 
+{
+  "LaunchTemplateName": "your-launch-template-name",
+  "VersionDescription": "Updated instance type",
+  "LaunchTemplateData": {
+    "InstanceType": "new-instance-type"
+  }
+}
