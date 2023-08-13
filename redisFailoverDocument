@@ -1,0 +1,76 @@
+Certainly! Here's a detailed document that explains the script and provides instructions for the failover and failback process using the script. You can customize this document further to match your environment and requirements.
+
+---
+
+# AWS ElastiCache Redis Failover and Failback Process
+
+## Introduction
+
+This document provides instructions on using a shell script to perform failover and failback operations for an AWS ElastiCache Redis cluster within the same region. The provided shell script leverages the AWS CLI and is designed to automate the process of promoting a replica to be the new primary (failover) and then simulating a failback to the original primary.
+
+## Prerequisites
+
+- AWS CLI installed and configured with appropriate credentials.
+- Familiarity with AWS ElastiCache and its replication concepts.
+
+## Script Overview
+
+The provided shell script (`redis_failover.sh`) uses the `getopts` command to handle command-line options and flags. The script allows you to perform two main actions: "failover" and "failback."
+
+- **Failover:** Promotes a specified replica in a given Availability Zone (AZ) to be the new primary.
+- **Failback:** Simulates a failback operation by promoting the original primary instance back to being the primary.
+
+## Script Usage
+
+To use the script, follow these steps:
+
+1. **Download the Script:**
+   Download the `redis_failover.sh` script to your local machine or server.
+
+2. **Give Execution Permissions:**
+   Make the script executable by running the following command:
+   ```
+   chmod +x redis_failover.sh
+   ```
+
+3. **Run the Script:**
+   Execute the script with the following command:
+   ```
+   ./redis_failover.sh -c <cluster-name> -a <action> -z <az> -r <region>
+   ```
+
+   Replace the placeholders with the actual values:
+   - `<cluster-name>`: The name of your AWS ElastiCache Redis cluster.
+   - `<action>`: Specify "failover" or "failback" to choose the desired operation.
+   - `<az>`: The target Availability Zone (AZ) for failover. For failback, this should be the original primary AZ.
+   - `<region>`: The AWS region where your cluster is located.
+
+## Script Execution Steps
+
+1. **Parsing Command-Line Options:**
+   The script uses `getopts` to parse the command-line options and flags. It checks for the presence of required flags (`-c`, `-a`, `-z`, and `-r`) and their values.
+
+2. **Validating Input:**
+   The script validates that the provided action is either "failover" or "failback." It also validates that the provided AZ is from a predefined list of valid AZs.
+
+3. **Executing Failover or Failback:**
+   Depending on the chosen action, the script will execute the corresponding function:
+   - `try_failover()`: Promotes a replica to be the new primary.
+   - `try_failback()`: Simulates a failback by promoting the original primary.
+
+4. **AWS CLI Commands:**
+   The script uses the AWS CLI to execute the necessary commands for modifying the replication group, promoting replicas, and waiting for the cluster to become available.
+
+5. **Error Handling:**
+   The script includes error checks for each critical step. If any command fails, an error message is displayed, and the script exits with a status code of 1.
+
+6. **Completion Message:**
+   Upon successful execution of the chosen action, the script displays a "Done!" message.
+
+## Conclusion
+
+This document has outlined how to use the provided shell script to automate the failover and failback process for an AWS ElastiCache Redis cluster within the same region. By following the steps and guidelines provided, you can ensure a smooth process for handling failover and failback scenarios in your environment.
+
+---
+
+Feel free to adapt and expand this document to match your specific needs and internal documentation standards.
