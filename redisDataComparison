@@ -1,0 +1,24 @@
+#!/bin/bash
+
+PRIMARY_ENDPOINT="<primary-endpoint>"
+SECONDARY_ENDPOINT="<secondary-endpoint>"
+
+PRIMARY_KEYS=$(redis-cli -h $PRIMARY_ENDPOINT --scan)
+SECONDARY_KEYS=$(redis-cli -h $SECONDARY_ENDPOINT --scan)
+
+DIFF_KEYS=""
+
+for key in $PRIMARY_KEYS; do
+  PRIMARY_VALUE=$(redis-cli -h $PRIMARY_ENDPOINT GET "$key")
+  SECONDARY_VALUE=$(redis-cli -h $SECONDARY_ENDPOINT GET "$key")
+
+  if [ "$PRIMARY_VALUE" != "$SECONDARY_VALUE" ]; then
+    DIFF_KEYS="$DIFF_KEYS$key"$'\n'
+  fi
+done
+
+if [ -z "$DIFF_KEYS" ]; then
+  echo "No differences found between the instances."
+else
+  echo -e "Keys with differing values:\n$DIFF_KEYS"
+fi
