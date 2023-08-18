@@ -1,0 +1,40 @@
+Subject: Urgent Action Required: High Vulnerabilities in Prod AWS Account - Command CR Needed
+
+
+I hope this email finds you well. I am writing to bring to your immediate attention some critical findings from our recent Dome 9 vulnerability scan conducted on our production AWS account. The scan has revealed several high vulnerabilities that require urgent remediation to ensure the security and compliance of our environment.
+
+Here are the key vulnerabilities identified along with the suggested steps for remediation, UAT testing status, the roles involved in the validation process, and the designated implementors:
+
+1. **SNS Topics Security**:
+   - **Vulnerability**: Unencrypted SNS topics
+   - **Remediation Steps**: Encrypt all SNS topics using AWS Key Management Service (KMS) encryption. This will ensure that messages sent to these topics are securely encrypted and protected from unauthorized access.
+   - **UAT Testing Status**: Remediation steps for SNS topics have been successfully tested in the UAT environment and have shown positive results.
+   - **Validation Roles**: The DOCAT team will perform technical validation, and we require a representative from the business side to validate the functionality from their perspective.
+   - **Implementor**: Rupinder Singh will oversee the implementation of the SNS topic encryption.
+
+2. **Security Group Configuration of RDS**:
+   - **Vulnerability**: Overly permissive security group settings for RDS instances
+   - **Remediation Steps**: Update the security group rules associated with the RDS instances to only allow traffic from the designated Kubernetes (k8s) applications subnet. Remove any unnecessary inbound access and implement the principle of least privilege.
+   - **UAT Testing Status**: Remediation steps for security groups have been successfully tested in the UAT environment and have shown positive results.
+   - **Validation Roles**: The DOCAT team will perform technical validation, and we require a representative from the business side to validate the functionality from their perspective.
+   - **Implementor**: Rupinder Singh will be responsible for implementing the security group changes for RDS instances.
+
+3. **Unencrypted AWS Elasticache Redis**:
+   - **Vulnerability**: Unencrypted data at rest in AWS Elasticache Redis instances
+   - **Remediation Steps**: Enable encryption at rest for all AWS Elasticache Redis instances. This can be achieved by modifying the instance settings to use encryption, preferably using AWS Key Management Service (KMS) keys.
+   - **UAT Testing Status**: UAT testing for the AWS Elasticache Redis encryption is scheduled for [date], and we anticipate validating the changes shortly thereafter.
+   - **Validation Roles**: The DOCAT team will perform technical validation, and we require a representative from the business side to validate the functionality from their perspective.
+   - **Implementor**: Siva will be in charge of implementing the encryption-at-rest for AWS Elasticache Redis instances.
+
+Considering the critical nature of these vulnerabilities and the impending decommissioning of RAVPN, I emphasize the urgency of this matter. Our organization is moving to GlobalProtect, and achieving 100% Dome9 compliance is a prerequisite for this transition. It is imperative that these changes are implemented as soon as possible to ensure a smooth migration and maintain the highest security standards.
+
+To proceed with the remediation steps outlined above, I kindly request the SRO team to create a Command Change Request (CR) for each of these vulnerabilities. As per our internal procedures, the SRO team is responsible for initiating PROD CRs and obtaining the necessary approvals. Your swift action in this regard will help expedite the implementation and validation process.
+
+Please let us know the timeline for the CR initiation, and if there are any additional resources or information required from my team to expedite the remediation process. Collaboration between our teams is crucial to ensure the effective implementation of the necessary security measures.
+
+Once these vulnerabilities are addressed, we can significantly enhance the security posture of our production environment and mitigate potential risks. I appreciate your immediate attention to this matter and look forward to your prompt response.
+
+Thank you for your dedication to maintaining the security and reliability of our AWS environment.
+
+Best regards,
+
